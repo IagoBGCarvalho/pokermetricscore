@@ -38,31 +38,31 @@ PokerMetricsCore.Web/
 │ │ ├── MainLayout.razor 
 │ │ └── NavMenu.razor 
 │ └── Pages/ 
-│ ├── Upload.razor # Página Inicial (Home) 
-│ └── Reports.razor # Visualização dos Relatórios ├── Models/ 
+│ ├── Upload.razor # Página Inicial
+│ └── Reports.razor # Visualização dos Relatórios 
+├── Models/ 
 │ ├── Player.cs 
-│ ├── TournamentDefinition.cs 
-│ ├── PlayedTournament.cs 
-│ ├── Transaction.cs 
-│ ├── StatementFile.cs 
-│ └── TournamentPerformanceDto.cs 
+│ ├── DefinicaoTorneio.cs 
+│ ├── TorneioJogado.cs 
+│ ├── Transacao.cs 
+│ ├── Arquivo.cs 
+│ └── PerformanceTorneioDto.cs 
 ├── Services/ 
-│ ├── StatementProcessingService.cs 
-│ └── ReportsService.cs 
+│ ├── ProcessamentoArquivoService.cs 
+│ └── RelatorioService.cs 
 ├── Data/ 
-│ └── ApplicationDbContext.cs 
+│ └── PokerMetricsCoreContext.cs 
 ├── wwwroot/ 
 └── Program.cs
 ```
 
 ## 🔄 Fluxo da Aplicação
 
-1. **Acesso Inicial** (domínio:porta) - Carregamento da SPA Blazor.
-2. **Upload de Extrato** - Leitura do arquivo .xlsx via stream segura (SignalR).
+1. **Upload de Extrato** (domínio:porta) - Leitura do arquivo .xlsx via stream segura (SignalR).
    - O sistema ignora metadados do cabeçalho e busca a âncora de dados ("Date").
    - Aplica conversão de timezone e matemática modular para matching de torneios.
-3. **Persistência** - Dados salvos em SQLite com verificação de duplicidade.
-4. **Relatório** (`/Reports`) - Navegação automática para a visualização de ROI e Lucro Líquido.
+2. **Persistência** - Dados salvos em SQLite com verificação de duplicidade.
+3. **Relatório** (`/Reports`) - Navegação automática para a visualização de ROI e Lucro Líquido.
 
 ## 📊 Métricas Calculadas
 
@@ -72,19 +72,18 @@ PokerMetricsCore.Web/
 
 ## 🎮 Como Usar
 
-### 1. Obter Extrato da Bodog
-- Solicitar extrato semanal/mensal na plataforma Bodog.
+### 1. Obter Extrato da Ignition Poker
+- Solicitar extrato semanal/mensal na plataforma Ignition Poker.
 - Download do arquivo .xlsx com todas as transações.
 
 ### 2. Upload no Sistema
 - Acessar a página inicial.
-- (Opcional) Clicar em **"⚠️ Limpar Banco de Dados"** para resetar análises anteriores.
+- (Opcional) Clicar em **"⚠️ Limpar Banco de Dados"** para resetar análises anteriores do banco de dados.
 - Selecionar arquivo .xlsx.
 - Aguardar o processamento automático.
 
 ### 3. Analisar Resultados
 - O sistema redireciona automaticamente para `/reports`.
-- Identificar torneios "NÃO MAPEADOS" e analisar o ROI dos torneios conhecidos.
 
 ## ⚙️ Configuração e Execução
 

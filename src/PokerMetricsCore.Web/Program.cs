@@ -1,6 +1,25 @@
 using PokerMetricsCore.Web.Components;
+using PokerMetricsCore.Web.Data;
+using PokerMetricsCore.Web.Services;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Pegando a connection string do appsettings
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? "Data Source=pokermetrics.db";
+
+// Configuração do BD com FACTORY
+builder.Services.AddDbContextFactory<PokerMetricsCoreContext>(options =>
+    options.UseSqlite(connectionString));
+
+// Aumentando o limite do SignalR para uploads de arquivos grandes
+builder.Services.AddSignalR(e => {
+    e.MaximumReceiveMessageSize = 20 * 1024 * 1024; // 20MB
+});
+
+// Registrando serviços
+builder.Services.AddScoped<ProcessamentoArquivoService>();
+builder.Services.AddScoped<RelatorioService>();
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
@@ -8,7 +27,7 @@ builder.Services.AddRazorComponents()
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Configuração do pipeline do HTTP
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error", createScopeForErrors: true);

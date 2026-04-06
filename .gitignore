@@ -52,3 +52,19 @@ CodeCoverage/
 *.VisualState.xml
 TestResult.xml
 nunit-*.xml
+
+# Visual Studio
+.vs/
+*.csproj.user
+*.suo
+*.user
+*.sln.docstates
+*.vsdx
+
+# SQLite
+*.db
+*.db-shm
+*.db-wal
+
+# Arquivos de índice e cache
+MonstersSA.sln.FileContentIndex
