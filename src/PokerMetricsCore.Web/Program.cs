@@ -27,6 +27,15 @@ builder.Services.AddRazorComponents()
 
 var app = builder.Build();
 
+// Executa as migrações pendentes e cria o banco SQLite automaticamente
+using (var scope = app.Services.CreateScope())
+{
+    var dbFactory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<PokerMetricsCoreContext>>();
+    using var context = await dbFactory.CreateDbContextAsync();
+    
+    await context.Database.MigrateAsync();
+}
+
 // Configuração do pipeline do HTTP
 if (!app.Environment.IsDevelopment())
 {
