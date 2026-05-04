@@ -3,7 +3,16 @@ using PokerMetricsCore.Web.Data;
 using PokerMetricsCore.Web.Services;
 using Microsoft.EntityFrameworkCore;
 
-var builder = WebApplication.CreateBuilder(args);
+// Descobre o caminho físico e real do .exe (ex: a pasta na Área de Trabalho)
+var exePath = System.Diagnostics.Process.GetCurrentProcess().MainModule?.FileName ?? throw new InvalidOperationException("Unable to determine executable path.");
+var exeDir = System.IO.Path.GetDirectoryName(exePath) ?? throw new InvalidOperationException("Unable to determine executable directory.");
+
+// Força o servidor web a usar essa pasta como a raiz do projeto
+var builder = WebApplication.CreateBuilder(new WebApplicationOptions
+{
+    Args = args,
+    ContentRootPath = exeDir
+});
 
 // Pegando a connection string do appsettings
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? "Data Source=pokermetrics.db";
@@ -48,7 +57,9 @@ app.UseHttpsRedirection();
 
 app.UseAntiforgery();
 
-app.MapStaticAssets();
+// Ensina ao servidor o caminho exato do manifesto de arquivos estáticos
+var manifestPath = System.IO.Path.Combine(exeDir, "PokerMetricsCore.Web.staticwebassets.endpoints.json");
+app.MapStaticAssets(manifestPath);
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
