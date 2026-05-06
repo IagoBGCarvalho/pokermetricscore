@@ -79,12 +79,14 @@ PokerMetricsCore.Web/
 - Download do arquivo .xlsx com todas as transações.
 
 ### 2. Download
-Na aba de Releases do repositório do projeto no github (https://github.com/IagoBGCarvalho/sentinela/releases) estão disponíveis os pacotes Self-Contained para Windows (pasta zip com .exe) e para Linux-x64 (.bin).
+Na aba de Releases do repositório do projeto no github (https://github.com/IagoBGCarvalho/pokermetricscore/releases) estão disponíveis os pacotes Self-Contained para Windows (pasta zip com .exe) e para Linux-x64 (.bin).
 
 #### 2.1 Windows
-Basta descompactar o arquivo zip e dar um duplo clique no executável. O sistema irá abrir um terminal, criar o banco e subir o servidor local no console, basta clicar no endereço (http://localhost:5000) com a tecla "CTRL" pressionada que uma janela do navegador irá se abrir com o sistema rodando.
+Basta descompactar o arquivo `PokerMetricsCoreWin.zip` e dar um duplo clique no executável. O sistema irá abrir um terminal, criar o banco e subir o servidor local no console, basta clicar no endereço (http://localhost:5000) com a tecla "CTRL" pressionada que uma janela do navegador irá se abrir com o sistema rodando.
 
 #### 2.2 Linux
+- Descompactar arquivo `PokerMetricsCoreLinux.zip` e entrar no diretório extraído com `cd PokerMetricsCoreLinux`
+
 - Dar permissão de execução para o arquivo binário
 ```bash
 chmod +x PokerMetricsCore.Web
@@ -101,8 +103,12 @@ chmod +x PokerMetricsCore.Web
 - Selecionar arquivo .xlsx.
 - Aguardar o processamento automático.
 
+![Tela de Upload](./documents/images/Upload.png)
+
 ### 4. Analisar Resultados
 - O sistema redireciona automaticamente para `/reports`.
+
+![Tela de Relatório](./documents/images/Report.png)
 
 ## ⚙️ Configuração e Execução Para Desenvolvedores
 
