@@ -6,15 +6,16 @@ using System.Globalization;
 
 namespace PokerMetricsCore.Web.Services;
 
+// Serviço responsável por fazer a leitura do arquivo .xlsx
 public class ProcessamentoArquivoService
 {
-    // Serviço responsável por fazer a leitura do arquivo .xlsx
     private readonly IDbContextFactory<PokerMetricsCoreContext> _contextFactory;
+    private readonly IMatchingTorneiosService _matchingService;
 
-    public ProcessamentoArquivoService(IDbContextFactory<PokerMetricsCoreContext> contextFactory)
+    public ProcessamentoArquivoService(IDbContextFactory<PokerMetricsCoreContext> contextFactory, IMatchingTorneiosService matchingService)
     {
-        // A fábrica é injetada diretamente como se fosse o contexto
         _contextFactory = contextFactory;
+        _matchingService = matchingService;
     }
 
     public async Task ProcessStatementStreamAsync(Stream fileStream, string fileName, string playerName)
@@ -153,15 +154,7 @@ public class ProcessamentoArquivoService
             }
             else
             {
-                // LÓGICA DE TEMPO CIRCULAR!!!
-                // Um relógio tem 24h, então a distância entre 23:00 e 01:00 é 2 horas, não 22 horas.
-                definition = candidates.OrderBy(def =>
-                {
-                    double diffMinutes = Math.Abs((buyInTime - def.HorarioComeco).TotalMinutes);
-                    // A distância real é o menor valor entre a diferença direta e a volta no relógio
-                    double circularDiff = Math.Min(diffMinutes, 1440 - diffMinutes);
-                    return circularDiff;
-                }).First();
+                definition = _matchingService.AcharTorneioMaisProximo(buyInTime, candidates);
             }
 
             decimal totalBuyIn = Math.Abs(buyIns.Sum(t => t.ValorMonetario));

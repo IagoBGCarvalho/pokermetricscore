@@ -29,6 +29,7 @@ builder.Services.AddSignalR(e => {
 // Registrando serviços
 builder.Services.AddScoped<ProcessamentoArquivoService>();
 builder.Services.AddScoped<RelatorioService>();
+builder.Services.AddSingleton<IMatchingTorneiosService, MatchingTorneiosService>(); // Singleton porque essa classe não guarda estado interno
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
