@@ -68,3 +68,6 @@ nunit-*.xml
 
 # Arquivos de índice e cache
 MonstersSA.sln.FileContentIndex
+
+# C# Dev Kit / Visual Studio Code cache
+*.csproj.lscache

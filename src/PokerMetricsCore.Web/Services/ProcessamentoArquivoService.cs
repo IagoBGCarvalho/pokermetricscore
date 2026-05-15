@@ -6,19 +6,42 @@ using System.Globalization;
 
 namespace PokerMetricsCore.Web.Services;
 
-// Serviço responsável por fazer a leitura do arquivo .xlsx
+/// <summary>
+/// Serviço responsável pelo processamento de arquivos de extrato e orquestração da lógica de negócio.
+/// </summary>
+/// <remarks>
+/// Este serviço lida com a leitura física do arquivo Excel, a conversão de fusos horários,
+/// o agrupamento de transações e a persistência final no banco de dados.
+/// </remarks>
 public class ProcessamentoArquivoService
 {
     private readonly IDbContextFactory<PokerMetricsCoreContext> _contextFactory;
     private readonly IMatchingTorneiosService _matchingService;
 
+    /// <summary>
+    /// Inicializa uma nova instância da classe <see cref="ProcessamentoArquivoService"/>.
+    /// </summary>
+    /// <param name="contextFactory">Fábrica para criação do contexto do banco de dados.</param>
+    /// <param name="matchingService">Serviço especializado na lógica circular de matching de torneios.</param>
     public ProcessamentoArquivoService(IDbContextFactory<PokerMetricsCoreContext> contextFactory, IMatchingTorneiosService matchingService)
     {
         _contextFactory = contextFactory;
         _matchingService = matchingService;
     }
 
-    public async Task ProcessStatementStreamAsync(Stream fileStream, string fileName, string playerName)
+    /// <summary>
+    /// Processa o fluxo de um arquivo .xlsx de extrato da Ignition e salva os resultados.
+    /// </summary>
+    /// <remarks>
+    /// O método realiza a leitura via Stream, converte as datas de UTC para o fuso de Brasília,
+    /// filtra transações de MTT e utiliza o <see cref="IMatchingTorneiosService"/> para consolidar os torneios jogados.
+    /// </remarks>
+    /// <param name="fileStream">O stream de dados do arquivo Excel.</param>
+    /// <param name="fileName">O nome original do arquivo para fins de deduplicação no banco.</param>
+    /// <param name="playerName">O nome do jogador associado às transações.</param>
+    /// <returns>Uma <see cref="Task"/> que representa a operação assíncrona.</returns>
+    /// <exception cref="Exception">Lançada se o arquivo estiver vazio ou com o cabeçalho 'Date' ausente.</exception>
+    public async Task ProcessamentoFluxoArquivoAsync(Stream fileStream, string fileName, string playerName)
     {
         // Cria um contexto novo e descartável para esta operação
         using var context = await _contextFactory.CreateDbContextAsync();
@@ -55,20 +78,18 @@ public class ProcessamentoArquivoService
         // Usa o ClosedXML para ler o Stream do .xlsx
         using var workbook = new XLWorkbook(fileStream);
         var worksheet = workbook.Worksheets.First();
-
         var usedRange = worksheet.RangeUsed();
 
         if (usedRange == null)
         {
-            throw new Exception("O arquivo enviado está completamente vazio."); // Planilha vazia
+            throw new Exception("O arquivo enviado está completamente vazio.");
         }
-        
+
         // Variável para pular todas as linhas até achar o cabeçalho "Date" e puder começar a ler e armazenar no banco
         var rows = usedRange.RowsUsed();
-        
         var dataRows = rows
             .SkipWhile(row => row.Cell(1).GetValue<string>() != "Date")
-            .Skip(1); // Pula a própria linha que contém "Date"
+            .Skip(1);
 
         // Se não sobrar nada, o arquivo está com formato errado ou vazio
         if (!dataRows.Any())
@@ -78,13 +99,22 @@ public class ProcessamentoArquivoService
 
         var transacoes = new List<Transacao>();
 
+        // Definição do Fuso Horário de Brasília
+        var brasiliaTimeZone = TimeZoneInfo.FindSystemTimeZoneById("E. South America Standard Time");
+
         foreach (var row in dataRows)
         {
             // Se a célula de data estiver vazia, para, pois é o fim do arquivo)
             if (row.Cell(1).IsEmpty()) continue;
 
+            // Extração da data original
             var rawDate = row.Cell(1).GetDateTime();
-            var dataTransacaoBrasilia = rawDate.AddHours(-3); // Conversão de UTC (horário da bodog) para horário de brasília, permitindo utilizar os horários de late register
+            
+            // Delega ao .NET o tratamento da data para UTC
+            var dataUtc = DateTime.SpecifyKind(rawDate, DateTimeKind.Utc);
+            
+            // Conversão de UTC para horário de Brasília ("E. South America Standard Time")
+            var dataTransacaoBrasilia = TimeZoneInfo.ConvertTimeFromUtc(dataUtc, brasiliaTimeZone);
 
             string descricao = row.Cell(2).GetValue<string>();
             string referenceId = row.Cell(3).GetValue<string>();
@@ -94,8 +124,8 @@ public class ProcessamentoArquivoService
 
             if (!descricao.Contains("Poker Multi Table Tournament"))
                 continue;
-
-            // Mapeia os dados do registro (linha) do arquivo para adicionar no banco
+            
+            // Mapeia os dados das transações (linhas) do arquivo para adicionar no banco
             transacoes.Add(new Transacao
             {
                 Data = dataTransacaoBrasilia,
@@ -114,20 +144,16 @@ public class ProcessamentoArquivoService
 
         var torneiosJogados = new List<TorneioJogado>();
 
-        // Lógica de Matching
         foreach (var group in groupedTransactions)
         {
-            // Pega as transações de Buy-In (valor negativo)
+            // Pega as transações de Buy-In (valor negativo) e Pay-Out (valor positivo)
             var buyIns = group.Where(t => t.ValorMonetario < 0).ToList();
             var payouts = group.Where(t => t.ValorMonetario > 0).ToList();
 
-            // Se não tem buy-in (ex: ticket ou erro), continua, mas trata depois!!
             if (!buyIns.Any()) continue;
 
-            // Pega o valor do primeiro buy-in para identificar o tipo
+            // Pega o valor e o horário do primeiro buy-in para identificar o tipo
             decimal firstBuyInAmount = Math.Abs(buyIns.First().ValorMonetario);
-
-            // Pega o horário do PRIMEIRO buy-in
             var firstBuyInDate = group.Min(t => t.Data);
             var buyInTime = TimeOnly.FromDateTime(firstBuyInDate);
 
@@ -173,7 +199,6 @@ public class ProcessamentoArquivoService
             });
         }
 
-        // Adiciona tudo ao contexto e salva de uma vez
         context.Transacao.AddRange(transacoes);
         context.TorneioJogado.AddRange(torneiosJogados);
 
