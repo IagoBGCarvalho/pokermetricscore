@@ -1,23 +1,39 @@
 ﻿@inherits LayoutComponentBase
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
-
-    <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
+<div class="page-wrapper">
+    <nav class="navbar navbar-expand-md navbar-dark bg-dark shadow-sm py-3">
+        <div class="container">
+            <a class="navbar-brand fw-bold d-flex align-items-center" href="/">
+                <span class="fs-4 me-2">♠️</span> PokerMetricsCore
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarCollapse">
+                <ul class="navbar-nav ms-auto mb-2 mb-md-0">
+                    <li class="nav-item">
+                        <a class="nav-link px-3" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link px-3" href="/upload/ignition">Upload Ignition</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link px-3" href="/reports/ignition">Relatórios Ignition</a>
+                    </li>
+                </ul>
+            </div>
         </div>
+    </nav>
 
-        <article class="content px-4">
-            @Body
-        </article>
+    <main class="content-wrapper pb-5">
+        @Body
     </main>
 </div>
 
-<div id="blazor-error-ui" data-nosnippet>
-    An unhandled error has occurred.
-    <a href="." class="reload">Reload</a>
-    <span class="dismiss">🗙</span>
+<div id="blazor-error-ui" class="bg-danger text-white px-4 py-2 fixed-bottom shadow" style="display: none; z-index: 1050;">
+    Ocorreu um erro não tratado na aplicação.
+    <a href="" class="text-white text-decoration-underline ms-2 fw-bold">Recarregar página</a>
+    <a class="dismiss text-white float-end" style="cursor: pointer;">🗙</a>
 </div>

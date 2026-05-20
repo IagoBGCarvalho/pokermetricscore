@@ -1,44 +1,73 @@
-@page "/reports"
+@page "/reports/ignition"
 @using PokerMetricsCore.Web.Models
 @using PokerMetricsCore.Web.Services
 @inject RelatorioService RelatorioService
 
-<PageTitle>Relatório de Performance</PageTitle>
+<PageTitle>Relatório Ignition - PokerMetricsCore</PageTitle>
 
-<h1>Performance por Torneio</h1>
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1">
+                    <li class="breadcrumb-item"><a href="/">Home</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Relatórios Ignition</li>
+                </ol>
+            </nav>
+            <h2 class="mb-0">Performance por Torneio</h2>
+        </div>
+        <div>
+            <a href="/upload/ignition" class="btn btn-outline-primary">Novo Upload</a>
+        </div>
+    </div>
 
-@if (summaryData == null)
-{
-    <p><em>Carregando dados...</em></p>
-}
-else
-{
-    <table class="table table-striped table-hover">
-        <thead class="table-dark">
-            <tr>
-                <th>Torneio</th>
-                <th>Jogos</th>
-                <th>Resultado Líquido</th>
-                <th>ROI</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in summaryData)
-            {
-                <tr>
-                    <td>@item.NomeTorneio</td>
-                    <td>@item.TotalEntradas</td>
-                    <td class="@(item.TotalNetResult > 0? "text-success" : "text-danger")">
-                        @item.TotalNetResult.ToString("C")
-                    </td>
-                    <td class="@(item.ROI > 0? "text-success" : "text-danger")">
-                        @item.ROI.ToString("F2")%
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
-}
+    @if (summaryData == null)
+    {
+        <div class="d-flex justify-content-center py-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Carregando...</span>
+            </div>
+        </div>
+    }
+    else if (!summaryData.Any())
+    {
+        <div class="alert alert-info" role="alert">
+            Nenhum dado encontrado. Faça o upload de um extrato para começar.
+        </div>
+    }
+    else
+    {
+        <div class="card shadow-sm border-0">
+            <div class="table-responsive">
+                <table class="table table-hover table-striped mb-0 align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th class="ps-4">Torneio</th>
+                            <th class="text-center">Entradas</th>
+                            <th class="text-end">Net Result</th>
+                            <th class="text-end pe-4">ROI</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in summaryData)
+                        {
+                            <tr>
+                                <td class="ps-4 fw-medium">@item.NomeTorneio</td>
+                                <td class="text-center">@item.TotalEntradas</td>
+                                <td class="text-end fw-bold @(item.TotalNetResult > 0 ? "text-success" : (item.TotalNetResult < 0 ? "text-danger" : ""))">
+                                    @item.TotalNetResult.ToString("C")
+                                </td>
+                                <td class="text-end fw-bold pe-4 @(item.ROI > 0 ? "text-success" : (item.ROI < 0 ? "text-danger" : ""))">
+                                    @item.ROI.ToString("F2")%
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+</div>
 
 @code {
     private List<PerformanceTorneioDto>? summaryData;

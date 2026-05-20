@@ -1,4 +1,4 @@
-@page "/"
+@page "/upload/ignition"
 @using Microsoft.EntityFrameworkCore 
 @using PokerMetricsCore.Web.Data 
 @using PokerMetricsCore.Web.Services
@@ -6,30 +6,53 @@
 @inject NavigationManager Nav
 @inject IDbContextFactory<PokerMetricsCoreContext> DbFactory
 
-<PageTitle>Upload de Extrato</PageTitle>
+<PageTitle>Upload Ignition - PokerMetricsCore</PageTitle>
 
-<h1>Upload de Extrato Bodog</h1>
+<div class="container py-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">Home</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Upload Ignition</li>
+        </ol>
+    </nav>
 
-<div class="row">
-    <div class="col-md-6">
-        <div class="mb-3">
-            <label class="form-label">Selecione o arquivo.xlsx:</label>
-            <InputFile OnChange="HandleFileSelected" class="form-control" accept=".xlsx" />
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-dark text-white p-3">
+                    <h4 class="mb-0">Upload de Extrato - Ignition</h4>
+                </div>
+                <div class="card-body p-4">
+                    <p class="text-muted mb-4">Selecione o arquivo <strong>.xlsx</strong> baixado diretamente do portal da sua conta.</p>
+
+                    <div class="mb-4">
+                        <InputFile OnChange="HandleFileSelected" class="form-control form-control-lg" accept=".xlsx" />
+                    </div>
+
+                    @if (isLoading)
+                    {
+                        <div class="d-flex align-items-center text-primary mb-3">
+                            <div class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></div>
+                            <strong>Processando transações e realizando matching...</strong>
+                        </div>
+                    }
+                    
+                    @if (!string.IsNullOrEmpty(errorMessage))
+                    {
+                        <div class="alert alert-danger d-flex align-items-center" role="alert">
+                            <div>@errorMessage</div>
+                        </div>
+                    }
+                </div>
+                <div class="card-footer bg-white p-3 d-flex justify-content-end border-top-0">
+                    @* Transformamos em um botão outline vermelho para não chamar clique acidental *@
+                    <button class="btn btn-sm btn-outline-danger" @onclick="ResetDatabase">
+                        ⚠️ Limpar Dados Desta Plataforma
+                    </button>
+                </div>
+            </div>
         </div>
-
-        @if (isLoading)
-        {
-            <div class="alert alert-info">Processando arquivo... Por favor aguarde.</div>
-        }
-        @if (!string.IsNullOrEmpty(errorMessage))
-        {
-            <div class="alert alert-danger">@errorMessage</div>
-        }
     </div>
-</div>
-
-<div class="mb-3">
-    <button class="btn btn-warning" @onclick="ResetDatabase">⚠️ Limpar Banco de Dados</button>
 </div>
 
 @code {
@@ -56,7 +79,7 @@
             await ProcessingService.ProcessamentoFluxoArquivoAsync(stream, file.Name, "Iago Carvalho");
 
             // Redireciona para o relatório
-            Nav.NavigateTo("/reports");
+            Nav.NavigateTo("/reports/ignition");
         }
         catch (Exception ex)
         {

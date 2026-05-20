@@ -1,5 +1,28 @@
+/* Configuração Global do Fundo e Fonte */
 html, body {
-    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f4f6f9; /* Cinza claro suave para contraste */
+    color: #212529;
+    margin: 0;
+    padding: 0;
+}
+
+/* Garante que o layout ocupe a tela toda mesmo se tiver pouco conteúdo */
+.page-wrapper {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Espaçamento extra abaixo da Navbar */
+.content-wrapper {
+    flex: 1;
+    padding-top: 2rem;
+}
+
+/* Remove a borda padrão de foco em links para um visual mais limpo */
+a:focus {
+    outline: none;
 }
 
 a, .btn-link {
